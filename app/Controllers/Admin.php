@@ -23,11 +23,12 @@ class Admin extends BaseController
             'title'         => ucwords('admin')
         ];
 
-        return view('admin', $data);
+        return view('user/admin', $data);
     }
 
     // buatlah CRUD AJAX table admin dengan field id nama email password
-    public function getOne(){
+    public function getOne()
+    {
         $response = array();
 
         $id = $this->request->getPost('id');
@@ -44,7 +45,8 @@ class Admin extends BaseController
         return $this->response->setJSON($response);
     }
 
-    public function getAll(){
+    public function getAll()
+    {
         $response = $data['data'] = array();
 
         $result = $this->adminModel->select()->findAll();
@@ -68,7 +70,8 @@ class Admin extends BaseController
         return $this->response->setJSON($data);
     }
 
-    public function save(){
+    public function save()
+    {
         $response = array();
 
         $id = $this->request->getPost('id');
@@ -105,7 +108,8 @@ class Admin extends BaseController
         return $this->response->setJSON($response);
     }
 
-    public function remove(){
+    public function remove()
+    {
         $response = array();
 
         $id = $this->request->getPost('id');
@@ -128,6 +132,4 @@ class Admin extends BaseController
 
         return $this->response->setJSON($response);
     }
-
-
 }

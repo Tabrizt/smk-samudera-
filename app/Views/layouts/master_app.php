@@ -107,7 +107,7 @@
                             <ul class="dropdown-menu animated flipInX">
                                 <li class="user-body">
                                     <a class="dropdown-item" href="Profil"><i class="ti-user text-muted me-2"></i> Profile</a>
-                                    <a class="dropdown-item" href="<?= base_url('logout')?>"><i class="ti-lock text-muted me-2"></i> Logout</a>
+                                    <a class="dropdown-item" href="<?= base_url('logout') ?>"><i class="ti-lock text-muted me-2"></i> Logout</a>
                                 </li>
                             </ul>
                         </li>
@@ -143,53 +143,59 @@
                                 </a>
                             </li>
 
-                            <?php if(session()->get('level') != 'Administrator') : ?>
+                            <?php if (session()->get('level') != 'Administrator') : ?>
 
-                            <li>
-                                <a href="user">
-                                    <i class="fad fa-user-secret"><span class="path1"></span><span class="path2"></span></i>
-                                    <span>Data Petugas</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="angkatan">
-                                <i class="fad fa-university"></i><span class="path1"></span><span class="path2"></span></i>
-                                    <span>Data Angkatan</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="jurusan">
-                                <i class="fad fa-user-tag"></i><span class="path1"></span><span class="path2"></span></i>
-                                    <span>Data Jurusan</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="kelas">
-                                    <i class="fad fa-users-class"><span class="path1"></span><span class="path2"></span></i>
-                                    <span>Data Kelas</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="siswa">
-                                    <i class="fad fa-users"><span class="path1"></span><span class="path2"></span></i>
-                                    <span>Data Siswa</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="paslon">
-                                    <i class="fad fa-user-tie"><span class="path1"></span><span class="path2"></span></i>
-                                    <span>Data Paslon</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="pemenang-paslon">
-                                <i class="fad fa-trophy-alt"></i><span class="path1"></span><span class="path2"></span></i>
-                                    <span>Pemenang Paslon</span>
-                                </a>
-                            </li>
+                                <li>
+                                    <a href="admin">
+                                        <i class="fad fa-user-secret"><span class="path1"></span><span class="path2"></span></i>
+                                        <span>Data Admin</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="guru">
+                                        <i class="fad fa-user"><span class="path1"></span><span class="path2"></span></i>
+                                        <span>Data Guru</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="siswa">
+                                        <i class="fad fa-users"><span class="path1"></span><span class="path2"></span></i>
+                                        <span>Data Siswa</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="tahunajaran">
+                                        <i class="fad fa-university"></i><span class="path1"></span><span class="path2"></span></i>
+                                        <span>Data Angkatan</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="jurusan">
+                                        <i class="fad fa-user-tag"></i><span class="path1"></span><span class="path2"></span></i>
+                                        <span>Data Jurusan</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="kelas">
+                                        <i class="fad fa-users-class"><span class="path1"></span><span class="path2"></span></i>
+                                        <span>Data Kelas</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="paslon">
+                                        <i class="fad fa-user-tie"><span class="path1"></span><span class="path2"></span></i>
+                                        <span>Data Paslon</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="pemenang-paslon">
+                                        <i class="fad fa-trophy-alt"></i><span class="path1"></span><span class="path2"></span></i>
+                                        <span>Pemenang Paslon</span>
+                                    </a>
+                                </li>
 
                             <?php endif; ?>
-                            
+
                         </ul>
                     </div>
                 </div>

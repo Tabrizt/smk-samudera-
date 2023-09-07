@@ -23,11 +23,12 @@ class Guru extends BaseController
             'title'         => ucwords('guru')
         ];
 
-        return view('guru', $data);
+        return view('user/guru', $data);
     }
 
     // buatlah CRUD AJAX table guru dengan field id 	nama 	email 	password 	foto_profil
-    public function getOne(){
+    public function getOne()
+    {
         $response = array();
 
         $id = $this->request->getPost('id');
@@ -44,7 +45,8 @@ class Guru extends BaseController
         return $this->response->setJSON($response);
     }
 
-    public function getAll(){
+    public function getAll()
+    {
         $response = $data['data'] = array();
 
         $result = $this->guruModel->select()->findAll();
@@ -68,7 +70,8 @@ class Guru extends BaseController
         return $this->response->setJSON($data);
     }
 
-    public function save(){
+    public function save()
+    {
         $response = array();
 
         $id = $this->request->getPost('id');
@@ -101,7 +104,8 @@ class Guru extends BaseController
         return $this->response->setJSON($response);
     }
 
-    public function remove(){
+    public function remove()
+    {
         $response = array();
 
         $id = $this->request->getPost('id');

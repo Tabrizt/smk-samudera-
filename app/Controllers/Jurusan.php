@@ -3,109 +3,162 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+
 use App\Models\JurusanModel;
 
 class Jurusan extends BaseController
 {
-    protected $validation;
-    protected $jurusanModel;
 
-    public function __construct()
-    {
-        $this->jurusanModel = new JurusanModel();
-        $this->validation =  \Config\Services::validation();
-    }
+	protected $jurusanModel;
+	protected $validation;
 
-    public function index()
-    {
-        $data = [
-            'controller'    => ucwords('jurusan'),
-            'title'         => ucwords('jurusan')
-        ];
+	public function __construct()
+	{
+		$this->jurusanModel = new JurusanModel();
+		$this->validation =  \Config\Services::validation();
+	}
 
-        return view('jurusan', $data);
-    }
+	public function index()
+	{
 
-    // buatlah CRUD AJAX table jurusan dengan field id nama_jurusan
-    public function getOne(){
-        $response = array();
+		$data = [
+			'controller'    	=> ucwords('jurusan'),
+			'title'     		=> ucwords('jurusan')
+		];
 
-        $id = $this->request->getPost('id');
+		return view('user/jurusan', $data);
+	}
 
-        $result = $this->jurusanModel->select()->where('id', $id)->get()->getRowArray();
-        if ($result) {
-            $response['status'] = true;
-            $response['data'] = $result;
-        } else {
-            $response['status'] = false;
-            $response['data'] = null;
-        }
+	public function getAll()
+	{
+		$response = $data['data'] = array();
 
-        return $this->response->setJSON($response);
-    }
+		$result = $this->jurusanModel->select()->findAll();
+		$no = 1;
+		foreach ($result as $key => $value) {
+			$ops = '<div class="btn-group text-white">';
+			$ops .= '<a class="btn btn-dark" onClick="save(' . $value->id . ')"><i class="fas fa-pencil-alt"></i></a>';
+			$ops .= '<a class="btn btn-secondary text-dark" onClick="remove(' . $value->id . ')"><i class="fas fa-trash-alt"></i></a>';
+			$ops .= '</div>';
+			$data['data'][$key] = array(
+				$no,
+				$value->id,
+				$value->nama_jurusan,
 
-    public function getAll(){
-        $response = $data['data'] = array();
+				$ops
+			);
+			$no++;
+		}
 
-        $result = $this->jurusanModel->select()->findAll();
-        $no = 1;
-        foreach ($result as $key => $value) {
-            $ops = '<div class="btn-group text-white">';
-            $ops .= '<a class="btn btn-dark" onClick="save(' . $value->id . ')"><i class="fas fa-pencil-alt"></i></a>';
-            $ops .= '<a class="btn btn-secondary text-dark" onClick="remove(' . $value->id . ')"><i class="fas fa-trash-alt"></i></a>';
-            $ops .= '</div>';
-            $data['data'][$key] = array(
-                $no,
-                $value->nama_jurusan,
-                $ops
-            );
-            $no++;
-        }
+		return $this->response->setJSON($data);
+	}
 
-        return $this->response->setJSON($data);
-    }
+	public function getOne()
+	{
+		$response = array();
 
-    public function save(){
-        $response = array();
+		$id = $this->request->getPost('id');
 
-        $id = $this->request->getPost('id');
-        $nama_jurusan = $this->request->getPost('nama_jurusan');
+		if ($this->validation->check($id, 'required|numeric')) {
 
-        $data = array(
-            'nama_jurusan' => $nama_jurusan
-        );
+			$data = $this->jurusanModel->where('id', $id)->first();
 
-        if ($id == '') {
-            $result = $this->jurusanModel->insert($data);
-        } else {
-            $result = $this->jurusanModel->update($id, $data);
-        }
+			return $this->response->setJSON($data);
+		} else {
+			throw new \CodeIgniter\Exceptions\PageNotFoundException();
+		}
+	}
 
-        if ($result) {
-            $response['status'] = true;
-            $response['message'] = 'Data berhasil disimpan';
-        } else {
-            $response['status'] = false;
-            $response['message'] = 'Data gagal disimpan';
-        }
+	public function add()
+	{
+		$response = array();
 
-        return $this->response->setJSON($response);
-    }
+		$fields['id'] = $this->request->getPost('id');
+		$fields['nama_jurusan'] = $this->request->getPost('nama_jurusan');
 
-    public function remove(){
-        $response = array();
 
-        $id = $this->request->getPost('id');
+		$this->validation->setRules([
+			'nama_jurusan' => ['label' => 'Nama jurusan', 'rules' => 'required|min_length[0]|max_length[200]'],
 
-        $result = $this->jurusanModel->delete($id);
-        if ($result) {
-            $response['status'] = true;
-            $response['message'] = 'Data berhasil dihapus';
-        } else {
-            $response['status'] = false;
-            $response['message'] = 'Data gagal dihapus';
-        }
+		]);
 
-        return $this->response->setJSON($response);
-    }
+		if ($this->validation->run($fields) == FALSE) {
+
+			$response['success'] = false;
+			$response['messages'] = $this->validation->getErrors(); //Show Error in Input Form
+
+		} else {
+
+			if ($this->jurusanModel->insert($fields)) {
+
+				$response['success'] = true;
+				$response['messages'] = lang("App.insert-success");
+			} else {
+
+				$response['success'] = false;
+				$response['messages'] = lang("App.insert-error");
+			}
+		}
+
+		return $this->response->setJSON($response);
+	}
+
+	public function edit()
+	{
+		$response = array();
+
+		$fields['id'] = $this->request->getPost('id');
+		$fields['nama_jurusan'] = $this->request->getPost('nama_jurusan');
+
+
+		$this->validation->setRules([
+			'nama_jurusan' => ['label' => 'Nama jurusan', 'rules' => 'required|min_length[0]|max_length[200]'],
+
+		]);
+
+		if ($this->validation->run($fields) == FALSE) {
+
+			$response['success'] = false;
+			$response['messages'] = $this->validation->getErrors(); //Show Error in Input Form
+
+		} else {
+
+			if ($this->jurusanModel->update($fields['id'], $fields)) {
+
+				$response['success'] = true;
+				$response['messages'] = lang("App.update-success");
+			} else {
+
+				$response['success'] = false;
+				$response['messages'] = lang("App.update-error");
+			}
+		}
+
+		return $this->response->setJSON($response);
+	}
+
+	public function remove()
+	{
+		$response = array();
+
+		$id = $this->request->getPost('id');
+
+		if (!$this->validation->check($id, 'required|numeric')) {
+
+			throw new \CodeIgniter\Exceptions\PageNotFoundException();
+		} else {
+
+			if ($this->jurusanModel->where('id', $id)->delete()) {
+
+				$response['success'] = true;
+				$response['messages'] = lang("App.delete-success");
+			} else {
+
+				$response['success'] = false;
+				$response['messages'] = lang("App.delete-error");
+			}
+		}
+
+		return $this->response->setJSON($response);
+	}
 }

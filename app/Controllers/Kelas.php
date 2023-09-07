@@ -3,115 +3,172 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+
 use App\Models\KelasModel;
 
 class Kelas extends BaseController
 {
-    protected $validation;
-    protected $kelasModel;
 
-    public function __construct()
-    {
-        $this->kelasModel = new KelasModel();
-        $this->validation =  \Config\Services::validation();
-    }
+	protected $kelasModel;
+	protected $validation;
 
-    public function index()
-    {
-        $data = [
-            'controller'    => ucwords('kelas'),
-            'title'         => ucwords('kelas')
-        ];
+	public function __construct()
+	{
+		$this->kelasModel = new KelasModel();
+		$this->validation =  \Config\Services::validation();
+	}
 
-        return view('kelas', $data);
-    }
+	public function index()
+	{
 
-    // buatlah CRUD AJAX table kelas dengan field id nama_kelas id_tahun_ajar id_jurusan
-    public function getOne(){
-        $response = array();
+		$data = [
+			'controller'    	=> ucwords('kelas'),
+			'title'     		=> ucwords('kelas')
+		];
 
-        $id = $this->request->getPost('id');
+		return view('user/kelas', $data);
+	}
 
-        $result = $this->kelasModel->select()->where('id', $id)->get()->getRowArray();
-        if ($result) {
-            $response['status'] = true;
-            $response['data'] = $result;
-        } else {
-            $response['status'] = false;
-            $response['data'] = null;
-        }
+	public function getAll()
+	{
+		$response = $data['data'] = array();
 
-        return $this->response->setJSON($response);
-    }
-    
-    public function getAll(){
-        $response = $data['data'] = array();
+		$result = $this->kelasModel->select()->findAll();
+		$no = 1;
+		foreach ($result as $key => $value) {
+			$ops = '<div class="btn-group text-white">';
+			$ops .= '<a class="btn btn-dark" onClick="save(' . $value->id . ')"><i class="fas fa-pencil-alt"></i></a>';
+			$ops .= '<a class="btn btn-secondary text-dark" onClick="remove(' . $value->id . ')"><i class="fas fa-trash-alt"></i></a>';
+			$ops .= '</div>';
+			$data['data'][$key] = array(
+				$no,
+				$value->id,
+				$value->nama_kelas,
+				$value->id_tahun_ajar,
+				$value->id_jurusan,
 
-        $result = $this->kelasModel->select()->findAll();
-        $no = 1;
-        foreach ($result as $key => $value) {
-            $ops = '<div class="btn-group text-white">';
-            $ops .= '<a class="btn btn-dark" onClick="save(' . $value->id . ')"><i class="fas fa-pencil-alt"></i></a>';
-            $ops .= '<a class="btn btn-secondary text-dark" onClick="remove(' . $value->id . ')"><i class="fas fa-trash-alt"></i></a>';
-            $ops .= '</div>';
-            $data['data'][$key] = array(
-                $no,
-                $value->nama_kelas,
-                $value->id_tahun_ajar,
-                $value->id_jurusan,
-                $ops
-            );
-            $no++;
-        }
+				$ops
+			);
+			$no++;
+		}
 
-        return $this->response->setJSON($data);
-    }
+		return $this->response->setJSON($data);
+	}
 
-    public function save(){
-        $response = array();
+	public function getOne()
+	{
+		$response = array();
 
-        $id = $this->request->getPost('id');
-        $nama_kelas = $this->request->getPost('nama_kelas');
-        $id_tahun_ajar = $this->request->getPost('id_tahun_ajar');
-        $id_jurusan = $this->request->getPost('id_jurusan');
+		$id = $this->request->getPost('id');
 
-        $data = array(
-            'nama_kelas' => $nama_kelas,
-            'id_tahun_ajar' => $id_tahun_ajar,
-            'id_jurusan' => $id_jurusan
-        );
+		if ($this->validation->check($id, 'required|numeric')) {
 
-        if ($id == '') {
-            $result = $this->kelasModel->insert($data);
-        } else {
-            $result = $this->kelasModel->update($id, $data);
-        }
+			$data = $this->kelasModel->where('id', $id)->first();
 
-        if ($result) {
-            $response['status'] = true;
-            $response['message'] = 'Data berhasil disimpan';
-        } else {
-            $response['status'] = false;
-            $response['message'] = 'Data gagal disimpan';
-        }
+			return $this->response->setJSON($data);
+		} else {
+			throw new \CodeIgniter\Exceptions\PageNotFoundException();
+		}
+	}
 
-        return $this->response->setJSON($response);
-    }
+	public function add()
+	{
+		$response = array();
 
-    public function remove(){
-        $response = array();
+		$fields['id'] = $this->request->getPost('id');
+		$fields['nama_kelas'] = $this->request->getPost('nama_kelas');
+		$fields['id_tahun_ajar'] = $this->request->getPost('id_tahun_ajar');
+		$fields['id_jurusan'] = $this->request->getPost('id_jurusan');
 
-        $id = $this->request->getPost('id');
 
-        $result = $this->kelasModel->delete($id);
-        if ($result) {
-            $response['status'] = true;
-            $response['message'] = 'Data berhasil dihapus';
-        } else {
-            $response['status'] = false;
-            $response['message'] = 'Data gagal dihapus';
-        }
+		$this->validation->setRules([
+			'nama_kelas' => ['label' => 'Nama kelas', 'rules' => 'required|min_length[0]|max_length[200]'],
+			'id_tahun_ajar' => ['label' => 'Id tahun ajar', 'rules' => 'required|numeric|min_length[0]|max_length[11]'],
+			'id_jurusan' => ['label' => 'Id jurusan', 'rules' => 'required|numeric|min_length[0]|max_length[11]'],
 
-        return $this->response->setJSON($response);
-    }
+		]);
+
+		if ($this->validation->run($fields) == FALSE) {
+
+			$response['success'] = false;
+			$response['messages'] = $this->validation->getErrors(); //Show Error in Input Form
+
+		} else {
+
+			if ($this->kelasModel->insert($fields)) {
+
+				$response['success'] = true;
+				$response['messages'] = lang("App.insert-success");
+			} else {
+
+				$response['success'] = false;
+				$response['messages'] = lang("App.insert-error");
+			}
+		}
+
+		return $this->response->setJSON($response);
+	}
+
+	public function edit()
+	{
+		$response = array();
+
+		$fields['id'] = $this->request->getPost('id');
+		$fields['nama_kelas'] = $this->request->getPost('nama_kelas');
+		$fields['id_tahun_ajar'] = $this->request->getPost('id_tahun_ajar');
+		$fields['id_jurusan'] = $this->request->getPost('id_jurusan');
+
+
+		$this->validation->setRules([
+			'nama_kelas' => ['label' => 'Nama kelas', 'rules' => 'required|min_length[0]|max_length[200]'],
+			'id_tahun_ajar' => ['label' => 'Id tahun ajar', 'rules' => 'required|numeric|min_length[0]|max_length[11]'],
+			'id_jurusan' => ['label' => 'Id jurusan', 'rules' => 'required|numeric|min_length[0]|max_length[11]'],
+
+		]);
+
+		if ($this->validation->run($fields) == FALSE) {
+
+			$response['success'] = false;
+			$response['messages'] = $this->validation->getErrors(); //Show Error in Input Form
+
+		} else {
+
+			if ($this->kelasModel->update($fields['id'], $fields)) {
+
+				$response['success'] = true;
+				$response['messages'] = lang("App.update-success");
+			} else {
+
+				$response['success'] = false;
+				$response['messages'] = lang("App.update-error");
+			}
+		}
+
+		return $this->response->setJSON($response);
+	}
+
+	public function remove()
+	{
+		$response = array();
+
+		$id = $this->request->getPost('id');
+
+		if (!$this->validation->check($id, 'required|numeric')) {
+
+			throw new \CodeIgniter\Exceptions\PageNotFoundException();
+		} else {
+
+			if ($this->kelasModel->where('id', $id)->delete()) {
+
+				$response['success'] = true;
+				$response['messages'] = lang("App.delete-success");
+			} else {
+
+				$response['success'] = false;
+				$response['messages'] = lang("App.delete-error");
+			}
+		}
+
+		return $this->response->setJSON($response);
+	}
 }

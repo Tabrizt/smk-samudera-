@@ -3,156 +3,201 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+
 use App\Models\SiswaModel;
 
 class Siswa extends BaseController
 {
-    protected $validation;
-    protected $siswaModel;
 
-    public function __construct()
-    {
-        $this->siswaModel = new SiswaModel();
-        $this->validation =  \Config\Services::validation();
-    }
+	protected $siswaModel;
+	protected $validation;
 
-    public function index()
-    {
-        $data = [
-            'controller'    => ucwords('siswa'),
-            'title'         => ucwords('siswa')
-        ];
+	public function __construct()
+	{
+		$this->siswaModel = new SiswaModel();
+		$this->validation =  \Config\Services::validation();
+	}
 
-        return view('siswa', $data);
-    }
+	public function index()
+	{
 
-    // buatlah CRUD AJAX table siswa dengan field id 	nama_siswa 	id_kelas 	nisn 	alamat 	email 	foto_profil 	password
-    public function getOne(){
-        $response = array();
+		$data = [
+			'controller'    	=> ucwords('siswa'),
+			'title'     		=> ucwords('siswa')
+		];
 
-        $id = $this->request->getPost('id');
+		return view('user/siswa', $data);
+	}
 
-        $result = $this->siswaModel->select()->where('id', $id)->get()->getRowArray();
-        if ($result) {
-            $response['status'] = true;
-            $response['data'] = $result;
-        } else {
-            $response['status'] = false;
-            $response['data'] = null;
-        }
+	public function getAll()
+	{
+		$response = $data['data'] = array();
 
-        return $this->response->setJSON($response);
-    }
+		$result = $this->siswaModel->select()->findAll();
+		$no = 1;
+		foreach ($result as $key => $value) {
+			$ops = '<div class="btn-group text-white">';
+			$ops .= '<a class="btn btn-dark" onClick="save(' . $value->id . ')"><i class="fas fa-pencil-alt"></i></a>';
+			$ops .= '<a class="btn btn-secondary text-dark" onClick="remove(' . $value->id . ')"><i class="fas fa-trash-alt"></i></a>';
+			$ops .= '</div>';
+			$data['data'][$key] = array(
+				$no,
+				$value->nama_siswa,
+				$value->id_kelas,
+				$value->nisn,
+				$value->alamat,
+				$value->email,
+				$value->foto_profil,
+				$value->password,
+				$value->created_at,
+				$value->updated_at,
 
-    public function getAll(){
-        $response = array();
+				$ops
+			);
+			$no++;
+		}
 
-        $result = $this->siswaModel->select('siswa.*, kelas.nama_kelas')->join('kelas', 'kelas.id = siswa.id_kelas')->get()->getResultArray();
-        
-        $no = 1;
-        foreach ($result as $key => $value) {
-            $ops = '<div class="btn-group text-white">';
-            $ops .= '<a class="btn btn-dark" onClick="save(' . $value->id . ')"><i class="fas fa-pencil-alt"></i></a>';
-            $ops .= '<a class="btn btn-secondary text-dark" onClick="remove(' . $value->id . ')"><i class="fas fa-trash-alt"></i></a>';
-            $ops .= '</div>';
-            $data['data'][$key] = array(
-                $no,
-                $value->nama_siswa,
-                $value->nama_kelas,
-                $value->nisn,
-                $value->alamat,
-                $value->email,
-                $value->foto_profil,
-                $ops
-            );
-            $no++;
-        }
+		return $this->response->setJSON($data);
+	}
 
-        return $this->response->setJSON($response);
-    }
+	public function getOne()
+	{
+		$response = array();
 
-    public function insert(){
-        $response = array();
+		$id = $this->request->getPost('id');
 
-        $data = [
-            'nama_siswa'    => $this->request->getPost('nama_siswa'),
-            'id_kelas'      => $this->request->getPost('id_kelas'),
-            'nisn'          => $this->request->getPost('nisn'),
-            'alamat'        => $this->request->getPost('alamat'),
-            'email'         => $this->request->getPost('email'),
-            'foto_profil'   => $this->request->getPost('foto_profil'),
-            'password'      => $this->request->getPost('password'),
-        ];
+		if ($this->validation->check($id, 'required|numeric')) {
 
-        $this->validation->run($data, 'siswa');
-        $errors = $this->validation->getErrors();
+			$data = $this->siswaModel->where('id', $id)->first();
 
-        if (!$errors) {
-            $result = $this->siswaModel->insert($data);
-            if ($result) {
-                $response['status'] = true;
-                $response['message'] = 'Data berhasil ditambahkan';
-            } else {
-                $response['status'] = false;
-                $response['message'] = 'Data gagal ditambahkan';
-            }
-        } else {
-            $response['status'] = false;
-            $response['message'] = $errors;
-        }
+			return $this->response->setJSON($data);
+		} else {
+			throw new \CodeIgniter\Exceptions\PageNotFoundException();
+		}
+	}
 
-        return $this->response->setJSON($response);
-    }
+	public function add()
+	{
+		$response = array();
 
-    public function update(){
-        $response = array();
+		$fields['id'] = $this->request->getPost('id');
+		$fields['nama_siswa'] = $this->request->getPost('nama_siswa');
+		$fields['id_kelas'] = $this->request->getPost('id_kelas');
+		$fields['nisn'] = $this->request->getPost('nisn');
+		$fields['alamat'] = $this->request->getPost('alamat');
+		$fields['email'] = $this->request->getPost('email');
+		$fields['foto_profil'] = $this->request->getPost('foto_profil');
+		$fields['password'] = $this->request->getPost('password');
+		$fields['created_at'] = $this->request->getPost('created_at');
+		$fields['updated_at'] = $this->request->getPost('updated_at');
 
-        $id = $this->request->getPost('id');
 
-        $data = [
-            'nama_siswa'    => $this->request->getPost('nama_siswa'),
-            'id_kelas'      => $this->request->getPost('id_kelas'),
-            'nisn'          => $this->request->getPost('nisn'),
-            'alamat'        => $this->request->getPost('alamat'),
-            'email'         => $this->request->getPost('email'),
-            'foto_profil'   => $this->request->getPost('foto_profil'),
-            'password'      => $this->request->getPost('password'),
-        ];
+		$this->validation->setRules([
+			'nama_siswa' => ['label' => 'Nama siswa', 'rules' => 'required|min_length[0]|max_length[200]'],
+			'id_kelas' => ['label' => 'Id kelas', 'rules' => 'required|numeric|min_length[0]|max_length[11]'],
+			'nisn' => ['label' => 'Nisn', 'rules' => 'required|min_length[0]|max_length[12]'],
+			'alamat' => ['label' => 'Alamat', 'rules' => 'required|min_length[0]'],
+			'email' => ['label' => 'Email', 'rules' => 'required|valid_email|min_length[0]|max_length[200]'],
+			'foto_profil' => ['label' => 'Foto profil', 'rules' => 'required|min_length[0]|max_length[200]'],
+			'password' => ['label' => 'Password', 'rules' => 'required|min_length[0]|max_length[200]'],
+			'created_at' => ['label' => 'Created at', 'rules' => 'required|valid_date|min_length[0]'],
+			'updated_at' => ['label' => 'Updated at', 'rules' => 'required|valid_date|min_length[0]'],
 
-        $this->validation->run($data, 'siswa');
-        $errors = $this->validation->getErrors();
+		]);
 
-        if (!$errors) {
-            $result = $this->siswaModel->update($id, $data);
-            if ($result) {
-                $response['status'] = true;
-                $response['message'] = 'Data berhasil diubah';
-            } else {
-                $response['status'] = false;
-                $response['message'] = 'Data gagal diubah';
-            }
-        } else {
-            $response['status'] = false;
-            $response['message'] = $errors;
-        }
+		if ($this->validation->run($fields) == FALSE) {
 
-        return $this->response->setJSON($response);
-    }
+			$response['success'] = false;
+			$response['messages'] = $this->validation->getErrors(); //Show Error in Input Form
 
-    public function delete(){
-        $response = array();
+		} else {
 
-        $id = $this->request->getPost('id');
+			if ($this->siswaModel->insert($fields)) {
 
-        $result = $this->siswaModel->delete($id);
-        if ($result) {
-            $response['status'] = true;
-            $response['message'] = 'Data berhasil dihapus';
-        } else {
-            $response['status'] = false;
-            $response['message'] = 'Data gagal dihapus';
-        }
+				$response['success'] = true;
+				$response['messages'] = lang("App.insert-success");
+			} else {
 
-        return $this->response->setJSON($response);
-    }
+				$response['success'] = false;
+				$response['messages'] = lang("App.insert-error");
+			}
+		}
+
+		return $this->response->setJSON($response);
+	}
+
+	public function edit()
+	{
+		$response = array();
+
+		$fields['id'] = $this->request->getPost('id');
+		$fields['nama_siswa'] = $this->request->getPost('nama_siswa');
+		$fields['id_kelas'] = $this->request->getPost('id_kelas');
+		$fields['nisn'] = $this->request->getPost('nisn');
+		$fields['alamat'] = $this->request->getPost('alamat');
+		$fields['email'] = $this->request->getPost('email');
+		$fields['foto_profil'] = $this->request->getPost('foto_profil');
+		$fields['password'] = $this->request->getPost('password');
+		$fields['created_at'] = $this->request->getPost('created_at');
+		$fields['updated_at'] = $this->request->getPost('updated_at');
+
+
+		$this->validation->setRules([
+			'nama_siswa' => ['label' => 'Nama siswa', 'rules' => 'required|min_length[0]|max_length[200]'],
+			'id_kelas' => ['label' => 'Id kelas', 'rules' => 'required|numeric|min_length[0]|max_length[11]'],
+			'nisn' => ['label' => 'Nisn', 'rules' => 'required|min_length[0]|max_length[12]'],
+			'alamat' => ['label' => 'Alamat', 'rules' => 'required|min_length[0]'],
+			'email' => ['label' => 'Email', 'rules' => 'required|valid_email|min_length[0]|max_length[200]'],
+			'foto_profil' => ['label' => 'Foto profil', 'rules' => 'required|min_length[0]|max_length[200]'],
+			'password' => ['label' => 'Password', 'rules' => 'required|min_length[0]|max_length[200]'],
+			'created_at' => ['label' => 'Created at', 'rules' => 'required|valid_date|min_length[0]'],
+			'updated_at' => ['label' => 'Updated at', 'rules' => 'required|valid_date|min_length[0]'],
+
+		]);
+
+		if ($this->validation->run($fields) == FALSE) {
+
+			$response['success'] = false;
+			$response['messages'] = $this->validation->getErrors(); //Show Error in Input Form
+
+		} else {
+
+			if ($this->siswaModel->update($fields['id'], $fields)) {
+
+				$response['success'] = true;
+				$response['messages'] = lang("App.update-success");
+			} else {
+
+				$response['success'] = false;
+				$response['messages'] = lang("App.update-error");
+			}
+		}
+
+		return $this->response->setJSON($response);
+	}
+
+	public function remove()
+	{
+		$response = array();
+
+		$id = $this->request->getPost('id');
+
+		if (!$this->validation->check($id, 'required|numeric')) {
+
+			throw new \CodeIgniter\Exceptions\PageNotFoundException();
+		} else {
+
+			if ($this->siswaModel->where('id', $id)->delete()) {
+
+				$response['success'] = true;
+				$response['messages'] = lang("App.delete-success");
+			} else {
+
+				$response['success'] = false;
+				$response['messages'] = lang("App.delete-error");
+			}
+		}
+
+		return $this->response->setJSON($response);
+	}
 }
