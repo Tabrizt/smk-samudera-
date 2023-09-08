@@ -7,7 +7,7 @@ use CodeIgniter\Model;
 class MataPelajaranModel extends Model
 {
     protected $DBGroup          = 'default';
-    protected $table            = 'matapelajaran';
+    protected $table            = 'mata_pelajaran';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';

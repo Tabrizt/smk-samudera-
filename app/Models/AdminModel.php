@@ -14,7 +14,13 @@ class AdminModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'nama', 	'email', 	'password' 	
+        'nama',     'email',     'password'
     ];
 
+    public function TotalAdmin()
+    {
+        $JmlAdmin = "SELECT COUNT('nama') FROM admin; ";
+        $JmlAdmin = $this->db->query($JmlAdmin)->getResult();
+        return $JmlAdmin;
     }
+}

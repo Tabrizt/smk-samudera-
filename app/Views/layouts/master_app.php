@@ -137,7 +137,7 @@
                         <ul class="sidebar-menu" data-widget="tree">
                             <li class="header">Dashboard</li>
                             <li>
-                                <a href="Dashboard">
+                                <a href="">
                                     <i class="icon-Layout-4-blocks"><span class="path1"></span><span class="path2"></span></i>
                                     <span>Dashboard</span>
                                 </a>
@@ -171,7 +171,7 @@
                                 </li>
                                 <li>
                                     <a href="jurusan">
-                                        <i class="fad fa-user-tag"></i><span class="path1"></span><span class="path2"></span></i>
+                                        <i class="fad fa-building"></i><span class="path1"></span><span class="path2"></span></i>
                                         <span>Data Jurusan</span>
                                     </a>
                                 </li>
@@ -182,9 +182,9 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="paslon">
-                                        <i class="fad fa-user-tie"><span class="path1"></span><span class="path2"></span></i>
-                                        <span>Data Paslon</span>
+                                    <a href="matapelajaran">
+                                        <i class="fad fa-book"><span class="path1"></span><span class="path2"></span></i>
+                                        <span>Mata Pelajaran</span>
                                     </a>
                                 </li>
                                 <li>

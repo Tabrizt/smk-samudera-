@@ -3,118 +3,176 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
-use App\Models\MataPelajaranModel;
 
-class MataPelajaran extends BaseController
+use App\Models\MatapelajaranModel;
+
+class Matapelajaran extends BaseController
 {
-    protected $validation;
-    protected $mataPelajaranModel;
 
-    public function __construct()
-    {
-        $this->mataPelajaranModel = new MataPelajaranModel();
-        $this->validation =  \Config\Services::validation();
-    }
+	protected $matapelajaranModel;
+	protected $validation;
 
-    public function index()
-    {
-        $data = [
-            'controller'    => ucwords('mata pelajaran'),
-            'title'         => ucwords('mata pelajaran')
-        ];
+	public function __construct()
+	{
+		$this->matapelajaranModel = new MataPelajaranModel();
+		$this->validation =  \Config\Services::validation();
+	}
 
-        return view('mata_pelajaran', $data);
-    }
+	public function index()
+	{
 
-    // buatlah CRUD AJAX table mata_pelajaran dengan field id 	nama_mapel 	waktu_mulai 	waktu_selesai 	gambar_header
-    public function getOne(){
-        $response = array();
+		$data = [
+			'controller'    	=> ucwords('matapelajaran'),
+			'title'     		=> ucwords('mata_pelajaran')
+		];
 
-        $id = $this->request->getPost('id');
+		return view('user/matapelajaran', $data);
+	}
 
-        $result = $this->mataPelajaranModel->select()->where('id', $id)->get()->getRowArray();
-        if ($result) {
-            $response['status'] = true;
-            $response['data'] = $result;
-        } else {
-            $response['status'] = false;
-            $response['data'] = null;
-        }
+	public function getAll()
+	{
+		$response = $data['data'] = array();
 
-        return $this->response->setJSON($response);
-    }
+		$result = $this->matapelajaranModel->select()->findAll();
+		$no = 1;
+		foreach ($result as $key => $value) {
+			$ops = '<div class="btn-group text-white">';
+			$ops .= '<a class="btn btn-dark" onClick="save(' . $value->id . ')"><i class="fas fa-pencil-alt"></i></a>';
+			$ops .= '<a class="btn btn-secondary text-dark" onClick="remove(' . $value->id . ')"><i class="fas fa-trash-alt"></i></a>';
+			$ops .= '</div>';
+			$data['data'][$key] = array(
+				$no,
+				$value->nama_mapel,
+				$value->waktu_mulai,
+				$value->waktu_selesai,
+				$value->gambar_header,
 
-    public function getAll(){
-        $response = $data['data'] = array();
+				$ops
+			);
+			$no++;
+		}
 
-        $result = $this->mataPelajaranModel->select()->findAll();
-        $no = 1;
-        foreach ($result as $key => $value) {
-            $ops = '<div class="btn-group text-white">';
-            $ops .= '<a class="btn btn-dark" onClick="save(' . $value->id . ')"><i class="fas fa-pencil-alt"></i></a>';
-            $ops .= '<a class="btn btn-secondary text-dark" onClick="remove(' . $value->id . ')"><i class="fas fa-trash-alt"></i></a>';
-            $ops .= '</div>';
-            $data['data'][$key] = array(
-                $no,
-                $value->nama_mapel,
-                $value->waktu_mulai,
-                $value->waktu_selesai,
-                $value->gambar_header,
-                $ops
-            );
-            $no++;
-        }
+		return $this->response->setJSON($data);
+	}
 
-        return $this->response->setJSON($data);
-    }
+	public function getOne()
+	{
+		$response = array();
 
-    public function save(){
-        $response = array();
+		$id = $this->request->getPost('id');
 
-        $id = $this->request->getPost('id');
-        $nama_mapel = $this->request->getPost('nama_mapel');
-        $waktu_mulai = $this->request->getPost('waktu_mulai');
-        $waktu_selesai = $this->request->getPost('waktu_selesai');
-        $gambar_header = $this->request->getPost('gambar_header');
+		if ($this->validation->check($id, 'required|numeric')) {
 
-        $data = array(
-            'nama_mapel' => $nama_mapel,
-            'waktu_mulai' => $waktu_mulai,
-            'waktu_selesai' => $waktu_selesai,
-            'gambar_header' => $gambar_header
-        );
+			$data = $this->matapelajaranModel->where('id', $id)->first();
 
-        if ($id == '') {
-            $result = $this->mataPelajaranModel->insert($data);
-        } else {
-            $result = $this->mataPelajaranModel->update($id, $data);
-        }
+			return $this->response->setJSON($data);
+		} else {
+			throw new \CodeIgniter\Exceptions\PageNotFoundException();
+		}
+	}
 
-        if ($result) {
-            $response['status'] = true;
-            $response['message'] = 'Data berhasil disimpan';
-        } else {
-            $response['status'] = false;
-            $response['message'] = 'Data gagal disimpan';
-        }
+	public function add()
+	{
+		$response = array();
 
-        return $this->response->setJSON($response);
-    }
+		$fields['id'] = $this->request->getPost('id');
+		$fields['nama_mapel'] = $this->request->getPost('nama_mapel');
+		$fields['waktu_mulai'] = $this->request->getPost('waktu_mulai');
+		$fields['waktu_selesai'] = $this->request->getPost('waktu_selesai');
+		$fields['gambar_header'] = $this->request->getPost('gambar_header');
 
-    public function remove(){
-        $response = array();
 
-        $id = $this->request->getPost('id');
+		$this->validation->setRules([
+			'nama_mapel' => ['label' => 'Nama mapel', 'rules' => 'required|min_length[0]|max_length[200]'],
+			'waktu_mulai' => ['label' => 'Waktu mulai', 'rules' => 'required|valid_date|min_length[0]'],
+			'waktu_selesai' => ['label' => 'Waktu selesai', 'rules' => 'required|valid_date|min_length[0]'],
+			'gambar_header' => ['label' => 'Gambar header', 'rules' => 'required|min_length[0]|max_length[200]'],
 
-        $result = $this->mataPelajaranModel->delete($id);
-        if ($result) {
-            $response['status'] = true;
-            $response['message'] = 'Data berhasil dihapus';
-        } else {
-            $response['status'] = false;
-            $response['message'] = 'Data gagal dihapus';
-        }
+		]);
 
-        return $this->response->setJSON($response);
-    }
+		if ($this->validation->run($fields) == FALSE) {
+
+			$response['success'] = false;
+			$response['messages'] = $this->validation->getErrors(); //Show Error in Input Form
+
+		} else {
+
+			if ($this->matapelajaranModel->insert($fields)) {
+
+				$response['success'] = true;
+				$response['messages'] = lang("App.insert-success");
+			} else {
+
+				$response['success'] = false;
+				$response['messages'] = lang("App.insert-error");
+			}
+		}
+
+		return $this->response->setJSON($response);
+	}
+
+	public function edit()
+	{
+		$response = array();
+
+		$fields['id'] = $this->request->getPost('id');
+		$fields['nama_mapel'] = $this->request->getPost('nama_mapel');
+		$fields['waktu_mulai'] = $this->request->getPost('waktu_mulai');
+		$fields['waktu_selesai'] = $this->request->getPost('waktu_selesai');
+		$fields['gambar_header'] = $this->request->getPost('gambar_header');
+
+
+		$this->validation->setRules([
+			'nama_mapel' => ['label' => 'Nama mapel', 'rules' => 'required|min_length[0]|max_length[200]'],
+			'waktu_mulai' => ['label' => 'Waktu mulai', 'rules' => 'required|valid_date|min_length[0]'],
+			'waktu_selesai' => ['label' => 'Waktu selesai', 'rules' => 'required|valid_date|min_length[0]'],
+			'gambar_header' => ['label' => 'Gambar header', 'rules' => 'required|min_length[0]|max_length[200]'],
+
+		]);
+
+		if ($this->validation->run($fields) == FALSE) {
+
+			$response['success'] = false;
+			$response['messages'] = $this->validation->getErrors(); //Show Error in Input Form
+
+		} else {
+
+			if ($this->matapelajaranModel->update($fields['id'], $fields)) {
+
+				$response['success'] = true;
+				$response['messages'] = lang("App.update-success");
+			} else {
+
+				$response['success'] = false;
+				$response['messages'] = lang("App.update-error");
+			}
+		}
+
+		return $this->response->setJSON($response);
+	}
+
+	public function remove()
+	{
+		$response = array();
+
+		$id = $this->request->getPost('id');
+
+		if (!$this->validation->check($id, 'required|numeric')) {
+
+			throw new \CodeIgniter\Exceptions\PageNotFoundException();
+		} else {
+
+			if ($this->matapelajaranModel->where('id', $id)->delete()) {
+
+				$response['success'] = true;
+				$response['messages'] = lang("App.delete-success");
+			} else {
+
+				$response['success'] = false;
+				$response['messages'] = lang("App.delete-error");
+			}
+		}
+
+		return $this->response->setJSON($response);
+	}
 }

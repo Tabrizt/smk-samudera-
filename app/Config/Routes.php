@@ -35,6 +35,7 @@ $routes->get('/guru', 'Guru::index');
 $routes->get('/siswa', 'Siswa::index');
 $routes->get('/jurusan', 'Jurusan::index');
 $routes->get('/tahunajaran', 'Tahunajaran::index');
+$routes->get('/profil', 'Tahunajaran::index');
 
 /*
  * --------------------------------------------------------------------
